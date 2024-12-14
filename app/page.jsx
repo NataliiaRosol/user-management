@@ -6,19 +6,19 @@ import UserCard from "@/components/user-card/UserCard";
 export default async function Home() {
 
   const getListOfUsers = await fetchUsersAction();
-  console.log(getListOfUsers);
+  // console.log(getListOfUsers);  
   
 
   return (
     <div className="p-20 max-w-6xl" >
       <div className="flex justify-between">
         <h1>User Management</h1>
-        <AddNewClient />
+        <AddNewClient />  
         
       </div>
-      <div className="mt-6">
+      <div className="mt-6 grid md:grid-cols-2 grid-cols-1 gap-5">
         {
-          getListOfUsers && getListOfUsers.data && getListOfUsers.data.length > 0 ? getListOfUsers.data.map(user => <UserCard key={user.id} user={user} />)
+          getListOfUsers && getListOfUsers.data && getListOfUsers.data.length > 0 ? getListOfUsers.data.map(user => <UserCard key={user._id} user={user} />)
           : <h3>No users found</h3>
         }
         

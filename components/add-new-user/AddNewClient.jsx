@@ -1,5 +1,5 @@
 "use client";
-import { addNewUserAction } from "@/actions";
+import { addNewUserAction, editUserAction } from "@/actions";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -10,16 +10,14 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { UserContext } from "@/context/UserContext";
 import { addNewUserFormControls, addNewUserFormInitialState } from "@/utils";
-import { useState } from "react";
+import { useContext} from "react";
 
 function AddNewClient() {
-  const [openPopup, setOpenPopup] = useState(false);
-  const [addNewUserFormData, setAddNewUserFormData] = useState(
-    addNewUserFormInitialState
-  );
+  const {openPopup, setOpenPopup, addNewUserFormData, setAddNewUserFormData, currentEditedId, setCurrentEditedId} = useContext(UserContext)
 
-  console.log(addNewUserFormData);
+  // console.log(addNewUserFormData);
 
   function handleSaveBtnValid() {
     return Object.keys(addNewUserFormData).every(
@@ -28,28 +26,33 @@ function AddNewClient() {
   }
 
   async function handleAddNewUserAction() {
-    const result = await addNewUserAction(addNewUserFormData);
-    console.log(result);
+    const result = currentEditedId !== null ? editUserAction(currentEditedId, addNewUserFormData, '/') :
+      await addNewUserAction(addNewUserFormData, '/');
+      setOpenPopup(false);
+      setAddNewUserFormData(addNewUserFormInitialState);
+      setCurrentEditedId(null)
   }
 
   return (
-    <div className="">
-      <Button onClick={() => setOpenPopup(true)}>Add new user</Button>
+    <div>
+      <Button onClick={() => setOpenPopup(true)}>Add New User</Button>
       <Dialog
         open={openPopup}
         onOpenChange={() => {
           setOpenPopup(false);
           setAddNewUserFormData(addNewUserFormInitialState);
+          setCurrentEditedId(null)
         }}
       >
         <DialogContent className="sm:max-w-[425px]">
           <DialogHeader>
-            <DialogTitle>Add new user</DialogTitle>
+            <DialogTitle>
+              {currentEditedId ? 'Edit User' : 'Add New User'}
+            </DialogTitle>
           </DialogHeader>
-
           <form action={handleAddNewUserAction} className="grid gap-4 py-4">
             {addNewUserFormControls.map((controlItem) => (
-              <div key={controlItem.name} className="my-2">
+              <div className="mb-5" key={controlItem.name}>
                 <Label htmlFor={controlItem.name} className="text-right">
                   {controlItem.label}
                 </Label>
@@ -57,21 +60,24 @@ function AddNewClient() {
                   id={controlItem.name}
                   name={controlItem.name}
                   placeholder={controlItem.placeholder}
+                  className="col-span-3"
                   type={controlItem.type}
                   value={addNewUserFormData[controlItem.name]}
-                  onChange={(e) => {
+                  onChange={(event) =>
                     setAddNewUserFormData({
                       ...addNewUserFormData,
-                      [controlItem.name]: e.target.value,
-                    });
-                  }}
-                  className="col-span-3"
+                      [controlItem.name]: event.target.value,
+                    })
+                  }
                 />
               </div>
             ))}
-
             <DialogFooter>
-              <Button disabled={!handleSaveBtnValid()} type="submit">
+              <Button
+                className="disabled:opacity-55"
+                disabled={!handleSaveBtnValid()}
+                type="submit"
+              >
                 Save
               </Button>
             </DialogFooter>

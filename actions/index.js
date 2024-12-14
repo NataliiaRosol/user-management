@@ -6,7 +6,7 @@ import { revalidatePath } from "next/cache";
 
 //add new user action
 
-export async function addNewUserAction(formData) {
+export async function addNewUserAction(formData, pathToRevalidate) {
   await connectToDB();
 
   try {
@@ -14,7 +14,7 @@ export async function addNewUserAction(formData) {
 
     const newlyCreatedUser = await User.create(formData);
     if (newlyCreatedUser) {
-      // revalidatePath(pathToRevalidate);
+      revalidatePath(pathToRevalidate);
       return {
         success: true,
         message: "User added successfully",
